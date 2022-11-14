@@ -1,5 +1,5 @@
 name: 'Cherry Picker'
-description: 'Cherry pick pull request commits into releases.'
+description: 'Cherry pick pull request to a specific branch.'
 inputs:
   token:
     description: 'Github token.'
