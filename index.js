@@ -91,7 +91,7 @@ async function run() {
       const title = `[CherryPick] ${pull.title}`
       const body = `Cherry pick of #${pullNumber}`
       const pullrquest = await createPull(client, context, branchName, toBranch, title, body);
-      console.log('Successfully created a pull request:', pullrquest.object.number);
+      console.log('Successfully created a pull request:', pullrquest.number);
     } catch (error) {
       console.log('An error occurred while trying to cherry pick.');
       console.log(error);
