@@ -1,0 +1,15 @@
+name: 'Cherry Picker'
+description: 'Cherry pick pull request commits into releases.'
+inputs:
+  token:
+    description: 'Github token.'
+    required: true
+  pull_number:
+    description: 'Number of the Github pull request.'
+    required: true
+  to_branch:
+    description: 'Branch to where the cherry-picks should be created.'
+    required: true
+runs:
+  using: 'node16'
+  main: 'index.js'
