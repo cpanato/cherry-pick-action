@@ -1,4 +1,4 @@
-name: 'Cherry Picker'
+name: 'cherry-pick'
 description: 'Cherry pick pull request to a specific branch.'
 inputs:
   token:
