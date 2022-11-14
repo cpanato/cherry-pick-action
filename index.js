@@ -8,6 +8,7 @@ async function createRef(client, context, ref, sha) {
     ref,
     sha
   });
+  console.log(response);
   return response.data;
 }
 
@@ -27,6 +28,7 @@ async function cherryPickCommits(octokit, context, head, commits) {
     head,
     commits
   });
+  console.log(response);
   return response;
 }
 
@@ -52,7 +54,9 @@ async function run() {
     const branchRef = `heads/${toBranch}`;
 
     try {
+
       const newHeadSha = await cherryPickCommits(client, context, branchName, commits);
+      console.log('cherry picke, creating branch');
       const newBranch = await createRef(client, context, `refs/${branchRef}`, newHeadSha);
       console.log('Successfully cherry picked commits:', newBranch);
 
