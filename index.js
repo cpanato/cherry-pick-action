@@ -42,9 +42,9 @@ async function cherryPickCommits(octokit, context, head, commits) {
 
 async function createPull(client, context, branch, base) {
   const response = await client.request("POST /repos/{owner}/{repo}/pulls", {
-    base,
+    base: base,
     body: "cherry pick of",
-    branch,
+    head: branch,
     ...context.repo,
     title: "ccherry"
   });
