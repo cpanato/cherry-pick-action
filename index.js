@@ -2,6 +2,14 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 const cherry = require('github-cherry-pick');
 
+async function getRef(client, context, ref) {
+  const response = await client.rest.git.getRef({
+    ...context.repo,
+    ref
+  });
+  return response.data;
+}
+
 async function createRef(client, context, ref, sha) {
   const response = await client.rest.git.createRef({
     ...context.repo,
@@ -55,11 +63,11 @@ async function run() {
     const branchRef = `heads/${toBranch}`;
 
     try {
-
+      const branchRef = await getRef(client, context, `refs/${toBranch}`);
+      const newBranch = await createRef(client, context, `refs/${branchRef}`, branchRef);
       const newHeadSha = await cherryPickCommits(client, context, branchName, commits);
-      console.log('cherry picke, creating branch');
-      const newBranch = await createRef(client, context, `refs/${branchRef}`, newHeadSha);
-      console.log('Successfully cherry picked commits:', newBranch);
+      console.log('cherry picker, creating branch');
+      console.log('Successfully cherry picked commits:', newHeadSha);
 
       response.success = true;
       response.newBranch = newBranch;
