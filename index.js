@@ -10,6 +10,14 @@ async function getRef(client, context, ref) {
   return response.data;
 }
 
+async function getPull(client, context, pullNumber) {
+  const response = await client.rest.pulls.get({
+    ...context.repo,
+    pull_number: pullNumber
+  });
+  return response.data;
+}
+
 async function createRef(client, context, ref, sha) {
   const response = await client.rest.git.createRef({
     ...context.repo,
@@ -79,8 +87,9 @@ async function run() {
       const newHeadSha = await cherryPickCommits(oktokit, context, branchName, commits);
       console.log('Successfully cherry picked commits:', newHeadSha);
 
-      const title = `Cherry pick of ${pullNumber}`
-      const body = `Cherry pick of ${pullNumber}`
+      const pull = await getPull(client, context, pullNumber);
+      const title = `[CherryPick] ${pull.title}`
+      const body = `Cherry pick of #${pullNumber}`
       const pullrquest = await createPull(client, context, branchName, toBranch, title, body);
       console.log('Successfully created a pull request:', pullrquest);
     } catch (error) {
