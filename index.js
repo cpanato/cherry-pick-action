@@ -37,7 +37,7 @@ async function run() {
     const pullNumber = parseInt(core.getInput('pull_number'));
     const toBranch = core.getInput('to_branch');
 
-    const client = new github.GitHub(token);
+    const client = github.getOctokit(token)
 
     console.log(`Repo: ${context.repo.owner}/${context.repo.repo}`);
     console.log('Pull request number:', pullNumber);
