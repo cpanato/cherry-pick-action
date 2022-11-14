@@ -3,7 +3,7 @@ const github = require('@actions/github');
 const cherry = require('github-cherry-pick');
 
 async function createRef(client, context, ref, sha) {
-  const response = await client.git.createRef({
+  const response = await client.rest.git.createRef({
     ...context.repo,
     ref,
     sha
@@ -12,7 +12,7 @@ async function createRef(client, context, ref, sha) {
 }
 
 async function getPullCommitShas(client, context, pullNumber) {
-  const pullCommits = (await client.pulls.listCommits({
+  const pullCommits = (await client.rest.pulls.listCommits({
     ...context.repo,
     pull_number: pullNumber
   })).data;
