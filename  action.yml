@@ -1,4 +1,4 @@
-name: 'cherry-pick'
+name: 'cherry-pick action'
 description: 'Cherry pick pull request to a specific branch.'
 inputs:
   token:
@@ -10,6 +10,11 @@ inputs:
   to_branch:
     description: 'Branch to where the cherry-picks should be created.'
     required: true
+
+branding:
+  icon: 'git-pull-request'
+  color: 'orange'
+
 runs:
   using: 'node16'
   main: 'index.js'
