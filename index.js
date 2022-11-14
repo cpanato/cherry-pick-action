@@ -39,6 +39,18 @@ async function cherryPickCommits(octokit, context, head, commits) {
   return response;
 }
 
+
+async function createPull(client, context, branch, base) {
+  const response = await client.request("POST /repos/{owner}/{repo}/pulls", {
+    base,
+    body: "cherry pick of",
+    branch,
+    ...context.repo,
+    title: "ccherry"
+  });
+  return response.data;
+}
+
 async function run() {
   try {
     const context = github.context;
@@ -65,8 +77,9 @@ async function run() {
       const baseBranchRef = await getRef(client, context, `heads/${toBranch}`);
       const newBranch = await createRef(client, context, branchRef, baseBranchRef.object.sha);
       const newHeadSha = await cherryPickCommits(oktokit, context, branchName, commits);
-      console.log('cherry picker, creating branch');
       console.log('Successfully cherry picked commits:', newHeadSha);
+      const pullrquest = await createPull(oktokit, context, branchName, toBranch);
+      console.log('Successfully created a pull request:', pullrquest);
     } catch (error) {
       console.log('An error occurred while trying to cherry pick.');
       console.log(error);
