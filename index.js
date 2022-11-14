@@ -22,11 +22,12 @@ async function getPullCommitShas(client, context, pullNumber) {
 }
 
 async function cherryPickCommits(octokit, context, head, commits) {
+  console.log(context, head, commits);
   const response = await cherry.cherryPickCommits({
     ...context.repo,
-    octokit,
-    head,
-    commits
+    octokit: octokit,
+    head: head,
+    commits: commits
   });
   console.log(response);
   return response;
@@ -66,6 +67,8 @@ async function run() {
     } catch (error) {
       console.log('An error occurred while trying to cherry pick.');
       console.log(error);
+      core.error(error);
+      core.setFailed(error.message);
     }
 
     console.log(JSON.stringify(cherryPicks));
