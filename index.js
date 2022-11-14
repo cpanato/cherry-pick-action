@@ -78,7 +78,7 @@ async function run() {
       const newBranch = await createRef(client, context, branchRef, baseBranchRef.object.sha);
       const newHeadSha = await cherryPickCommits(oktokit, context, branchName, commits);
       console.log('Successfully cherry picked commits:', newHeadSha);
-      const pullrquest = await createPull(oktokit, context, branchName, toBranch);
+      const pullrquest = await createPull(client, context, branchName, toBranch);
       console.log('Successfully created a pull request:', pullrquest);
     } catch (error) {
       console.log('An error occurred while trying to cherry pick.');
