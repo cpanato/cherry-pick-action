@@ -55,8 +55,7 @@ async function run() {
 
     const commits = await getPullCommitShas(client, context, pullNumber);
     console.log(JSON.stringify(commits));
-
-    const okto = client.rest
+    const oktokit = client.rest
 
     const cherryPicks = [];
     const branchName = `cherry-pick-${Date.now()}`;
@@ -65,13 +64,9 @@ async function run() {
     try {
       const baseBranchRef = await getRef(client, context, `heads/${toBranch}`);
       const newBranch = await createRef(client, context, branchRef, baseBranchRef.object.sha);
-      const newHeadSha = await cherryPickCommits(okto, context, branchName, commits);
+      const newHeadSha = await cherryPickCommits(oktokit, context, branchName, commits);
       console.log('cherry picker, creating branch');
       console.log('Successfully cherry picked commits:', newHeadSha);
-
-      response.success = true;
-      response.newBranch = newBranch;
-
     } catch (error) {
       console.log('An error occurred while trying to cherry pick.');
       console.log(error);
