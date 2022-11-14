@@ -31,7 +31,7 @@ async function getPullCommitShas(client, context, pullNumber) {
 async function cherryPickCommits(octokit, context, head, commits) {
   const response = await cherry.cherryPickCommits({
     ...context.repo,
-    octokit,
+    octokit.rest,
     head,
     commits
   });
