@@ -63,8 +63,8 @@ async function run() {
     const branchRef = `heads/${toBranch}`;
 
     try {
-      const branchRef = await getRef(client, context, `heads/${toBranch}`);
-      const newBranch = await createRef(client, context, `refs/${branchRef}`, branchRef);
+      const branchRef = await getRef(client, context, `refs/heads/${toBranch}`);
+      const newBranch = await createRef(client, context, `refs/${branchRef}`, branchRef.object.sha);
       const newHeadSha = await cherryPickCommits(client, context, branchName, commits);
       console.log('cherry picker, creating branch');
       console.log('Successfully cherry picked commits:', newHeadSha);
