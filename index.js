@@ -31,7 +31,7 @@ async function getPullCommitShas(client, context, pullNumber) {
 async function cherryPickCommits(octokit, context, head, commits) {
   const response = await cherry.cherryPickCommits({
     ...context.repo,
-    octokit.rest,
+    octokit,
     head,
     commits
   });
@@ -56,6 +56,8 @@ async function run() {
     const commits = await getPullCommitShas(client, context, pullNumber);
     console.log(JSON.stringify(commits));
 
+    const okto = client.rest
+
     const cherryPicks = [];
     const branchName = `cherry-pick-${Date.now()}`;
     const branchRef = `refs/heads/${branchName}`;
@@ -63,7 +65,7 @@ async function run() {
     try {
       const baseBranchRef = await getRef(client, context, `heads/${toBranch}`);
       const newBranch = await createRef(client, context, branchRef, baseBranchRef.object.sha);
-      const newHeadSha = await cherryPickCommits(client, context, branchName, commits);
+      const newHeadSha = await cherryPickCommits(okto, context, branchName, commits);
       console.log('cherry picker, creating branch');
       console.log('Successfully cherry picked commits:', newHeadSha);
 
