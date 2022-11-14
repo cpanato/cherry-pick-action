@@ -60,7 +60,7 @@ async function run() {
 
     const cherryPicks = [];
     const branchName = `cherry-pick-${Date.now()}`;
-    const branchRef = `heads/${toBranch}`;
+    const branchRef = `refs/heads/${toBranch}`;
 
     try {
       const baseBranchRef = await getRef(client, context, `heads/${toBranch}`);
