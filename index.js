@@ -16,7 +16,6 @@ async function createRef(client, context, ref, sha) {
     ref,
     sha
   });
-  console.log(response);
   return response.data;
 }
 
@@ -30,12 +29,11 @@ async function getPullCommitShas(client, context, pullNumber) {
 }
 
 async function cherryPickCommits(octokit, context, head, commits) {
-  console.log(context, head, commits);
   const response = await cherry.cherryPickCommits({
     ...context.repo,
-    octokit: octokit,
-    head: head,
-    commits: commits
+    octokit,
+    head,
+    commits
   });
   console.log(response);
   return response;
