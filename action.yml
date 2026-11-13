@@ -1,4 +1,4 @@
-name: 'cherry-pick action'
+name: 'Cherry-pick PR by cpanato'
 description: 'Cherry pick pull request to a specific branch.'
 inputs:
   token:
