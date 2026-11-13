@@ -1,25 +1,33 @@
 {
   "name": "cherry-pick-action",
   "version": "1.0.0",
-  "description": "",
-  "main": " index.js",
+  "description": "Cherry-pick a pull request onto a target branch and open a pull request.",
+  "type": "module",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "esbuild index.js --bundle --minify --platform=node --target=node24 --format=cjs --legal-comments=external --outfile=dist/index.cjs && node -e \"require('node:fs').copyFileSync('LICENSE', 'dist/LICENSE')\"",
+    "test": "node --test"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cpanato/cherry-pick-action.git"
   },
+  "engines": {
+    "node": ">=24"
+  },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/cpanato/cherry-pick-action/issues"
   },
   "homepage": "https://github.com/cpanato/cherry-pick-action#readme",
   "dependencies": {
-    "@actions/core": "^1.10.0",
-    "@actions/github": "^5.1.1",
+    "@actions/core": "^3.0.1",
+    "@actions/github": "^9.1.1",
     "github-cherry-pick": "^1.1.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
   }
 }
