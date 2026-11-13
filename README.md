@@ -11,14 +11,12 @@ permissions:
 
 steps:
   - name: Cherry-pick pull request
-    uses: cpanato/cherry-pick-action@v1.0.0
+    uses: cpanato/cherry-pick-action@v1.0.1
     with:
       token: ${{ secrets.GITHUB_TOKEN }}
       pull_number: 123
       to_branch: stable
 ```
-
-The `v1.0.0` release has [known dependency audit findings](https://github.com/cpanato/cherry-pick-action/releases/tag/v1.0.0).
 
 The token must be able to read the source pull request, create and delete branches, and create pull requests. Prefer the workflow's `GITHUB_TOKEN` with the permissions above over a more broadly privileged personal access token. Ensure the workflow's trigger and token policy allow these write permissions.
 
