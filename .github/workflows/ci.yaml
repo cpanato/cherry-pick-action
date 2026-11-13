@@ -41,3 +41,63 @@ jobs:
         run: |
           cmp LICENSE dist/LICENSE
           git diff --exit-code -- dist
+
+  action-e2e:
+    name: Action runner E2E (mock API)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Start mock GitHub API
+        run: |
+          node --input-type=module -e '
+            import { createMockGitHubServer } from "./scripts/mock-github.js";
+            createMockGitHubServer(process.env.GITHUB_REPOSITORY).server.listen(18765, "127.0.0.1");
+          ' > "$RUNNER_TEMP/mock-github.log" 2>&1 &
+          echo "$!" > "$RUNNER_TEMP/mock-github.pid"
+          for ((attempt = 0; attempt < 20; attempt++)); do
+            if curl --silent --fail http://127.0.0.1:18765/health >/dev/null; then
+              exit 0
+            fi
+            sleep 0.5
+          done
+          cat "$RUNNER_TEMP/mock-github.log"
+          exit 1
+
+      - name: Run local action
+        id: cherry-pick
+        uses: ./ # zizmor: ignore[self-repository] Test the action from the checked-out pull request.
+        env:
+          MOCK_GITHUB_API_URL: http://127.0.0.1:18765
+          NODE_OPTIONS: --require=./scripts/mock-github-preload.cjs
+        with:
+          token: test-token
+          pull_number: 42
+          to_branch: stable
+
+      - name: Verify action outputs and API calls
+        env:
+          BRANCH_NAME: ${{ steps.cherry-pick.outputs.branch_name }}
+          PULL_REQUEST_NUMBER: ${{ steps.cherry-pick.outputs.pull_request_number }}
+          PULL_REQUEST_URL: ${{ steps.cherry-pick.outputs.pull_request_url }}
+          MOCK_GITHUB_API_URL: http://127.0.0.1:18765
+        run: node scripts/verify-mock-github.js
+
+      - name: Stop mock GitHub API
+        if: always()
+        run: |
+          if [[ -f "$RUNNER_TEMP/mock-github.pid" ]]; then
+            kill "$(cat "$RUNNER_TEMP/mock-github.pid")"
+          fi

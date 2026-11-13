@@ -34,7 +34,7 @@ Merge commits in the source pull request are not supported by the cherry-pick im
 
 ## Development
 
-Install dependencies with `npm ci`, rebuild the action bundle with `npm run build`, then run all unit and bundled-action integration tests with `npm test`. The CI workflow checks that the bundle is up to date.
+Install dependencies with `npm ci`, rebuild the action bundle with `npm run build`, then run all unit and bundled-action integration tests with `npm test`. CI checks that the bundle is up to date and runs the action through the GitHub Actions runner against a local mock API. This runner test does not create real GitHub branches or pull requests.
 
 ## Releases
 
