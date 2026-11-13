@@ -12,6 +12,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    strategy:
+      matrix:
+        node: [development, runtime]
 
     permissions:
       contents: read
@@ -23,6 +26,14 @@ jobs:
           persist-credentials: false
 
       - name: Set up Node.js
+        if: matrix.node == 'development'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+
+      - name: Set up Actions runtime Node.js
+        if: matrix.node == 'runtime'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
@@ -40,6 +51,7 @@ jobs:
       - name: Verify committed bundle
         run: |
           cmp LICENSE dist/LICENSE
+          cmp THIRD_PARTY_NOTICES dist/THIRD_PARTY_NOTICES
           git diff --exit-code -- dist
 
   action-e2e:
@@ -57,7 +69,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           package-manager-cache: false
 
       - name: Start mock GitHub API

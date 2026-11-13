@@ -11,12 +11,14 @@ permissions:
 
 steps:
   - name: Cherry-pick pull request
-    uses: cpanato/cherry-pick-action@v1
+    uses: cpanato/cherry-pick-action@v1.0.0
     with:
       token: ${{ secrets.GITHUB_TOKEN }}
       pull_number: 123
       to_branch: stable
 ```
+
+The `v1.0.0` release has [known dependency audit findings](https://github.com/cpanato/cherry-pick-action/releases/tag/v1.0.0).
 
 The token must be able to read the source pull request, create and delete branches, and create pull requests. Prefer the workflow's `GITHUB_TOKEN` with the permissions above over a more broadly privileged personal access token. Ensure the workflow's trigger and token policy allow these write permissions.
 
@@ -34,8 +36,8 @@ Merge commits in the source pull request are not supported by the cherry-pick im
 
 ## Development
 
-Install dependencies with `npm ci`, rebuild the action bundle with `npm run build`, then run all unit and bundled-action integration tests with `npm test`. CI checks that the bundle is up to date and runs the action through the GitHub Actions runner against a local mock API. This runner test does not create real GitHub branches or pull requests.
+Use `nvm install` and `nvm use` to select the Node.js version in `.nvmrc`. Install dependencies with `npm ci`, rebuild the action bundle with `npm run build`, then run all unit and bundled-action integration tests with `npm test`. CI also tests Node 24, the GitHub Actions runtime, checks that the bundle is up to date, and runs the action through the GitHub Actions runner against a local mock API. This runner test does not create real GitHub branches or pull requests.
 
 ## Releases
 
-Push a semantic-version tag such as `v1.2.3` to create a GitHub Release with generated notes. Update the corresponding major tag (for example, `v1`) to the new release commit after publishing so consumers of `@v1` receive the latest compatible release.
+Push a semantic-version tag such as `v1.2.3` to create an immutable GitHub Release with generated notes. Consumers should use a full release tag and update it explicitly for new releases; do not create or move a major-version tag.
