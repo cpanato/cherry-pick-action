@@ -24,7 +24,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           package-manager-cache: false
 
       - name: Install dependencies
@@ -34,6 +34,7 @@ jobs:
         run: |
           npm run build
           cmp LICENSE dist/LICENSE
+          cmp THIRD_PARTY_NOTICES dist/THIRD_PARTY_NOTICES
           git diff --exit-code -- dist
 
       - name: Run unit and action integration tests

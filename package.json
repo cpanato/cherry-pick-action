@@ -5,7 +5,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild index.js --bundle --minify --platform=node --target=node24 --format=cjs --legal-comments=external --outfile=dist/index.cjs && node -e \"require('node:fs').copyFileSync('LICENSE', 'dist/LICENSE')\"",
+    "build": "esbuild index.js --bundle --minify --platform=node --target=node24 --format=cjs --legal-comments=external --outfile=dist/index.cjs && node -e \"const fs = require('node:fs'); fs.copyFileSync('LICENSE', 'dist/LICENSE'); fs.copyFileSync('THIRD_PARTY_NOTICES', 'dist/THIRD_PARTY_NOTICES')\"",
     "test": "node --test"
   },
   "repository": {
@@ -24,8 +24,7 @@
   "homepage": "https://github.com/cpanato/cherry-pick-action#readme",
   "dependencies": {
     "@actions/core": "^3.0.1",
-    "@actions/github": "^9.1.1",
-    "github-cherry-pick": "^1.1.0"
+    "@actions/github": "^9.1.1"
   },
   "devDependencies": {
     "esbuild": "^0.28.2"
