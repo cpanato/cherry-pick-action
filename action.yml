@@ -2,19 +2,27 @@ name: 'cherry-pick action'
 description: 'Cherry pick pull request to a specific branch.'
 inputs:
   token:
-    description: 'Github token.'
+    description: 'Token with contents:write and pull-requests:write permissions.'
     required: true
   pull_number:
-    description: 'Number of the Github pull request.'
+    description: 'Number of the pull request to cherry-pick.'
     required: true
   to_branch:
-    description: 'Branch to where the cherry-picks should be created.'
+    description: 'Target branch name (not refs/heads/<branch>).'
     required: true
+
+outputs:
+  branch_name:
+    description: 'Name of the branch created for the cherry-pick.'
+  pull_request_number:
+    description: 'Number of the created pull request.'
+  pull_request_url:
+    description: 'URL of the created pull request.'
 
 branding:
   icon: 'git-pull-request'
   color: 'orange'
 
 runs:
-  using: 'node16'
-  main: 'index.js'
+  using: 'node24'
+  main: 'dist/index.cjs'
