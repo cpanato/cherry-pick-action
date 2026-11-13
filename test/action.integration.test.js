@@ -1,84 +1,18 @@
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { describe, it } from 'node:test';
+import { createMockGitHubServer } from '../scripts/mock-github.js';
 
 const execFileAsync = promisify(execFile);
 const bundlePath = resolve('dist/index.cjs');
 
 describe('bundled action', () => {
   it('cherry-picks commits and opens a pull request through the GitHub API', async t => {
-    const requests = [];
-    let createdCommit = 0;
-    const server = createServer((request, response) => {
-      const chunks = [];
-      request.on('data', chunk => chunks.push(chunk));
-      request.on('end', () => {
-        const path = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
-        const body = chunks.length > 0
-          ? JSON.parse(Buffer.concat(chunks).toString())
-          : undefined;
-        requests.push({ method: request.method, path, body });
-
-        const send = (statusCode, data) => {
-          response.writeHead(statusCode, { 'content-type': 'application/json' });
-          response.end(data === undefined ? '' : JSON.stringify(data));
-        };
-
-        if (request.method === 'GET' && path === '/repos/owner/repo/pulls/42') {
-          return send(200, { number: 42, title: 'Source change' });
-        }
-        if (request.method === 'GET' && path === '/repos/owner/repo/pulls/42/commits') {
-          return send(200, [{ sha: 'source-commit' }]);
-        }
-        if (request.method === 'GET' && path.endsWith('/git/ref/heads/stable')) {
-          return send(200, { object: { sha: 'base-sha' } });
-        }
-        if (request.method === 'GET' && path.includes('/git/ref/heads/')) {
-          return send(200, { object: { sha: 'base-sha' } });
-        }
-        if (request.method === 'GET' && path.endsWith('/git/commits/base-sha')) {
-          return send(200, { tree: { sha: 'base-tree' } });
-        }
-        if (request.method === 'GET' && path.endsWith('/git/commits/source-commit')) {
-          return send(200, {
-            author: { name: 'Author', email: 'author@example.com', date: '2026-01-01T00:00:00Z' },
-            committer: { name: 'Committer', email: 'committer@example.com', date: '2026-01-01T00:00:00Z' },
-            message: 'Source commit',
-            parents: [{ sha: 'source-parent' }]
-          });
-        }
-        if (request.method === 'POST' && path.endsWith('/git/refs')) {
-          return send(201, { ref: body.ref, object: { sha: body.sha } });
-        }
-        if (request.method === 'POST' && path.endsWith('/git/commits')) {
-          createdCommit += 1;
-          return send(201, { sha: `created-commit-${createdCommit}` });
-        }
-        if (request.method === 'POST' && path.endsWith('/merges')) {
-          return send(201, { commit: { tree: { sha: 'merged-tree' } } });
-        }
-        if (request.method === 'PATCH' && path.includes('/git/refs/')) {
-          return send(200, { object: { sha: body.sha } });
-        }
-        if (request.method === 'DELETE' && path.includes('/git/refs/')) {
-          response.writeHead(204);
-          return response.end();
-        }
-        if (request.method === 'POST' && path === '/repos/owner/repo/pulls') {
-          return send(201, {
-            number: 73,
-            html_url: 'https://github.com/owner/repo/pull/73'
-          });
-        }
-
-        send(404, { message: `Unexpected request: ${request.method} ${path}` });
-      });
-    });
+    const { server, requests } = createMockGitHubServer();
 
     await new Promise(resolveListen => server.listen(0, '127.0.0.1', resolveListen));
     const address = server.address();
@@ -99,10 +33,12 @@ describe('bundled action', () => {
       env: {
         ...process.env,
         GITHUB_ACTIONS: 'true',
-        GITHUB_API_URL: `http://127.0.0.1:${address.port}`,
+        GITHUB_API_URL: 'https://api.github.com',
         GITHUB_EVENT_PATH: eventPath,
         GITHUB_OUTPUT: outputPath,
         GITHUB_REPOSITORY: 'owner/repo',
+        MOCK_GITHUB_API_URL: `http://127.0.0.1:${address.port}`,
+        NODE_OPTIONS: `--require=${JSON.stringify(resolve('scripts/mock-github-preload.cjs'))}`,
         INPUT_TOKEN: 'test-token',
         INPUT_PULL_NUMBER: '42',
         INPUT_TO_BRANCH: 'stable'
@@ -125,6 +61,18 @@ describe('bundled action', () => {
       getOutput('pull_request_url'),
       'https://github.com/owner/repo/pull/73'
     );
+
+    await execFileAsync(process.execPath, [resolve('scripts/verify-mock-github.js')], {
+      env: {
+        ...process.env,
+        BRANCH_NAME: branchName,
+        PULL_REQUEST_NUMBER: getOutput('pull_request_number'),
+        PULL_REQUEST_URL: getOutput('pull_request_url'),
+        GITHUB_REPOSITORY: 'owner/repo',
+        MOCK_GITHUB_API_URL: `http://127.0.0.1:${address.port}`
+      },
+      timeout: 15000
+    });
 
     assert.ok(requests.some(({ method, path }) =>
       method === 'POST' && path === '/repos/owner/repo/merges'));
