@@ -78,7 +78,7 @@ jobs:
 
       - name: Run local action
         id: cherry-pick
-        uses: ./
+        uses: ./ # zizmor: ignore[self-repository] Test the action from the checked-out pull request.
         env:
           MOCK_GITHUB_API_URL: http://127.0.0.1:18765
           NODE_OPTIONS: --require=./scripts/mock-github-preload.cjs
